@@ -24,80 +24,86 @@ import warnings
 warnings.filterwarnings('ignore')
 
 import logging
-logging.basicConfig(level=logging.INFO, message_format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO)
 
+from common.config import Config
+from generators.base import GeneratorBase
 
-from .common.constants import (
-    SUPPORTED_LANGUAGES,
-    TEXT_PROBS,
-    BACKGROUNDS_PATH,
-    MRZS_PATH,
-    ENGLISH_FONTS_PATH,
-    URDU_FONTS_PATH,
-    ARABIC_FONTS_PATH
-)
 
 
 class ODT:
     def __init__(
         self,
-        languages: List[str] = ['english'],
-        backgrounds_path: str = BACKGROUNDS_PATH,
-        fonts_path: str = None,
-        mrz_path: str = MRZS_PATH,
-        max_num_words: int = 10,
-        text_probs: List[float] = TEXT_PROBS,
-        output_image_size: Tuple[int, int] = (1024, 768),
-        split_train_test: bool = True,
-        train_test_ratio: Tuple[float, float] = (0.8, 0.2),
-        output_save_path: str = None,
-        generate_mrz: bool = False,
+        num_samples: int = Config.num_samples,
+        language: str = Config.language,
+        max_num_words: int = Config.max_num_words,
+        bag_of_words: List[str] = Config.bag_of_words,
+        backgrounds_path: str = Config.backgrounds_path,
+        fonts_path: str = Config.fonts_path,
+        text_probs: Dict[str, float] = None,
+        output_image_size: Tuple[int, int] = Config.output_image_size,
+        split_train_test: bool = Config.split_train_test,
+        train_test_ratio: Tuple[float, float] = Config.train_test_ratio,
+        output_save_path: str = Config.output_save_path,
         logger: logging.RootLogger = logging.getLogger(__name__)
     ):
-        self.languages = languages
+        self.num_samples = num_samples
+        self.language = language
         self.backgrounds_path = backgrounds_path
         self.fonts_path = fonts_path
-        self.mrz_path = mrz_path
         self.max_num_words = max_num_words
+        self.bag_of_words = bag_of_words
         self.text_probs = text_probs
         self.output_image_size = output_image_size
         self.split_train_test = split_train_test
         self.train_test_ratio = train_test_ratio
         self.output_save_path = output_save_path
-        self.generate_mrz = generate_mrz
         self.logger = logger
+
+        self.generator = None
         self.__setup()
     
 
     def __setup(self):
+        config = Config()
+        if self.language not in config.supported_languages:
+            raise ValueError(f"Language {self.language} is not supported. Supported languages are {config.supported_languages}")
+
+        if self.bag_of_words is None:
+            self.words_path = config.supported_languages[self.language]["words_path"]
+            self.bag_of_words = [x.replace("\n", "").strip() for x in open(self.words_path, "r").readlines() if x.strip() != ""][1:]
+        
         self.backgrounds: List[str] = []
         for bg_name in os.listdir(self.backgrounds_path):
             basename, ext = os.path.splitext(bg_name)
             if ext in ['.jpg', '.png', '.jpeg']:
                 self.backgrounds.append(os.path.join(self.backgrounds_path, bg_name))
-
         self.logger.info("Total backgrounds found: %s", len(self.backgrounds))
 
-        # download a list of words for use as background text
-        word_site = "https://www.mit.edu/~ecprice/wordlist.100000"
-        response = requests.get(word_site)
-        self.bag_of_words = [x.decode() for x in response.content.splitlines()]
-
         # list of font types to exclude
+        if self.fonts_path is None:
+            self.fonts_path = config.supported_languages[self.language]["fonts_path"]
+
         self.fonts = []
-        self.fonts_weights = []
         for font_path in glob.glob(os.path.join(self.fonts_path, "**", "*.ttf"), recursive=True):
             self.fonts.append(font_path)
-            if "Passport" in font_path:
-                self.fonts_weights.append(5)
-            elif "Visa" in font_path:
-                self.fonts_weights.append(1)
-            else:
-                self.fonts_weights.append(2)
 
-        self.mrz = []
-        with open(self.mrz_path, "r") as reader:
-            self.mrz = [r.replace("\n", "").strip() for r in reader.readlines()]
-
-        self.mrz.extend(generate_mrz_list(2000))
+        if self.text_probs is None:
+            self.text_probs = config.text_probs
         self.punctuations = ['-', '<', '/', ',', "'", ':', '&', '.', '(', ')']
+
+    def generate(self):
+        gen = GeneratorBase(
+            num_samples=self.num_samples,
+            bag_of_words=self.bag_of_words,
+            text_probs=self.text_probs,
+            fonts=self.fonts,
+            backgrounds=self.backgrounds,
+        )
+        text, image = gen.generate()
+
+        print(text)
+
+        image.save("test.png")
+    
+
