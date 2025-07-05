@@ -27,7 +27,3 @@ setup(
     include_package_data=True,
     zip_safe=False
 )
-
-
-# command for generating setup file
-# python setup.py sdist bdist_wheel
