@@ -1,0 +1,3 @@
+recursive-include ocr_data_toolkit/data/backgrounds *
+recursive-include ocr_data_toolkit/data/fonts *
+recursive-include ocr_data_toolkit/data/vocab *
