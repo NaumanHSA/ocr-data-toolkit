@@ -2,11 +2,11 @@ from setuptools import setup, find_packages
 
 setup(
     name='ocr-data-toolkit',
-    version='0.1.0',
+    version='0.1.2',
     author='Muhammad Nouman Ahsan',
     author_email='naumanhsa965@gmail.com',
     description='A toolkit for generating synthetic data for OCR',
-    long_description=open('README.md').read(),
+    long_description=open('README_PYPI.md').read(),
     long_description_content_type='text/markdown',
     url='https://github.com/NaumanHSA/ocr-data-toolkit',
     license='MIT',

@@ -114,6 +114,8 @@ Desktop.ini
 
 # Windows "mark of the web" alternate data streams
 *Zone.Identifier
+README_PYPI.md
 
+scripts/
 export/
 font_catalog/

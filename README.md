@@ -241,8 +241,8 @@ ocr_data_toolkit/
 ```
 
 - **`ODT` class:** Main entry point for data generation, configuration, and utilities.
-- **`ENGenerator` class:** Handles random text/image synthesis with fonts, backgrounds, and augmentations.
 - **`Augmentation` class:** Implements all augmentation methods (noise, blur, moire, distortion, etc).
+- **`generators.py`:** Contains text-image synthesis logic for different languages.
 - **`utils.py`:** Helper functions for resizing, font selection, backgrounds, etc.
 - **`config.py`:** Centralizes default and user configuration.
 
@@ -269,12 +269,6 @@ Please:
 - Fork the repo and create a branch for your feature or bugfix.
 - Add tests and documentation for new features.
 - Open a pull request describing your changes.
-
-We are especially interested in:
-- Expanding multilingual capabilities
-- Adding new and realistic augmentations
-- Making the toolkit easier to use for the community
-
 ---
 
 ## License
@@ -285,7 +279,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENCE) file 
 
 ## Acknowledgements
 
-- Developed by Muhammad Nouman Ahsan ([LinkedIn](https://www.linkedin.com/in/nomihsa965/))
+- Developed by Muhammad Nouman Ahsan - [LinkedIn](https://www.linkedin.com/in/nomihsa965/)
 - Inspired by real-world OCR data challenges and research needs
 
 ---
